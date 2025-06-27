@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Open_Sans } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const openSans = Open_Sans({ 
+  subsets: ['latin'],
+  display: 'swap', // Bessere Performance
+})
 
 export const metadata: Metadata = {
   title: {
@@ -19,7 +22,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={openSans.className}>
         {children}
       </body>
     </html>
