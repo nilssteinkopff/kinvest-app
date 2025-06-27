@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-open-sans);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -19,8 +19,35 @@
   }
 }
 
-body {
+/* Mindestbreite für die gesamte App */
+html, body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-width: 320px;
+}
+
+/* Horizontales Scrollen bei sehr schmalen Bildschirmen */
+@media (max-width: 320px) {
+  body {
+    overflow-x: auto;
+  }
+}
+
+/* Verhindert Layout-Probleme bei sehr schmalen Bildschirmen */
+* {
+  min-width: 0;
+}
+
+/* Spezielle Behandlung für Flexbox-Container */
+.flex {
+  min-width: 0;
+}
+
+/* Optimierung für mobile Ansichten */
+@media (max-width: 640px) {
+  .truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
