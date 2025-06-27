@@ -417,22 +417,29 @@ export default function Example() {
           Save
         </button>
       </div>
+      
+      {/* Billing Section */}
       <div className="bg-gray-50 sm:rounded-lg">
-      <div className="px-4 py-5 sm:p-6 mt-6">
-        <h3 className="text-base font-semibold text-gray-900">Abonnement und Rechnungen</h3>
-        <div className="mt-2 max-w-xl text-sm text-gray-500">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus praesentium tenetur pariatur.</p>
-        </div>
-        <div className="mt-5">
-          <button
-            type="button"
-            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
-          >
-            Rechnungsportal
-          </button>
+        <div className="px-4 py-5 sm:p-6 mt-6">
+          <h3 className="text-base font-semibold text-gray-900">Abonnement und Rechnungen</h3>
+          <div className="mt-2 max-w-xl text-sm text-gray-500">
+            <p>Verwalte dein Abonnement, ändere deine Zahlungsmethode oder lade Rechnungen herunter.</p>
+          </div>
+          <div className="mt-5">
+            <a
+              href="https://billing.stripe.com/p/login/00g3cB48IbK6fv25kk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 transition-colors"
+            >
+              Rechnungsportal öffnen
+              <svg className="ml-2 -mr-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
-    </div>
     </form>
   )
 }
