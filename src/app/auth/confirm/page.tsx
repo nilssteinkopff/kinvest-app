@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
-export default function AuthConfirm() {
+function AuthConfirmContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
@@ -123,5 +123,22 @@ export default function AuthConfirm() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function AuthConfirm() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950 p-4">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto"></div>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Loading authentication...
+          </p>
+        </div>
+      </div>
+    }>
+      <AuthConfirmContent />
+    </Suspense>
   )
 }
