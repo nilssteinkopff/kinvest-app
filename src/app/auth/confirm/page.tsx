@@ -160,8 +160,8 @@ function AuthConfirmContent() {
           Completing your sign in...
         </p>
         
-        {/* Debug Info (jetzt auch in Production) */}
-        {debugInfo.length > 0 && (
+        {/* Debug Info (nur in Development) */}
+        {process.env.NODE_ENV === 'development' && debugInfo.length > 0 && (
           <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-left">
             <h3 className="font-semibold text-sm mb-2">Debug Info:</h3>
             <div className="text-xs space-y-1 max-h-40 overflow-y-auto">
