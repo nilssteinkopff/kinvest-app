@@ -237,7 +237,7 @@ export default function LoginPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-md bg-yellow-600 px-3 py-2 text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-                  >
+                  <a>
                     Jetzt abonnieren
                   </a>
                 </div>
@@ -254,7 +254,7 @@ export default function LoginPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
+            <a>
               Hier abonnieren
             </a>
           </p>
