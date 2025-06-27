@@ -36,6 +36,9 @@ function AuthConfirmContent() {
       const magic_token = urlParams.get('token')
       const magic_type = urlParams.get('type')
       
+      // Extract OAuth authorization code (PKCE flow)
+      const auth_code = urlParams.get('code')
+      
       // Extract other possible parameters
       const token_hash = urlParams.get('token_hash')
       const error_description = urlParams.get('error_description')
@@ -43,6 +46,7 @@ function AuthConfirmContent() {
       
       addDebug(`Hash tokens: access=${!!access_token}, refresh=${!!refresh_token}, type=${token_type}`)
       addDebug(`Magic link: token=${!!magic_token}, type=${magic_type}`)
+      addDebug(`OAuth code: ${!!auth_code}`)
       addDebug(`URL params: token_hash=${!!token_hash}`)
       
       if (error || error_description) {
@@ -67,13 +71,31 @@ function AuthConfirmContent() {
             addDebug(`✅ Session set successfully for: ${data.user?.email}`)
             // Clear hash and redirect
             window.history.replaceState({}, document.title, window.location.pathname)
-            router.push('/dashboard')
+            window.location.href = '/dashboard'
           }
         } catch (err) {
           addDebug(`❌ Unexpected error: ${err}`)
           router.push('/login?error=Session setup failed')
         }
       } 
+      // Handle OAuth Authorization Code (PKCE flow)
+      else if (auth_code) {
+        addDebug('✅ Found OAuth authorization code, exchanging for session...')
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(auth_code)
+
+          if (error) {
+            addDebug(`❌ Code exchange error: ${error.message}`)
+            router.push(`/login?error=${encodeURIComponent(error.message)}`)
+          } else {
+            addDebug(`✅ Code exchange successful for: ${data.user?.email}`)
+            window.location.href = '/dashboard'
+          }
+        } catch (err) {
+          addDebug(`❌ Unexpected error: ${err}`)
+          router.push('/login?error=Code exchange failed')
+        }
+      }
       // Handle Magic Link tokens (URL parameters)
       else if (magic_token && magic_type === 'magiclink') {
         addDebug('✅ Found magic link token, verifying...')
@@ -88,7 +110,7 @@ function AuthConfirmContent() {
             router.push(`/login?error=${encodeURIComponent(error.message)}`)
           } else {
             addDebug(`✅ Magic link verification successful for: ${data.user?.email}`)
-            router.push('/dashboard')
+            window.location.href = '/dashboard'
           }
         } catch (err) {
           addDebug(`❌ Unexpected error: ${err}`)
