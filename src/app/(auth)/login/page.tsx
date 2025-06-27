@@ -10,6 +10,7 @@ function MagicLoginContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [isEmailSent, setIsEmailSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const searchParams = useSearchParams()
   const supabase = createClient()
 
@@ -36,7 +37,7 @@ function MagicLoginContent() {
         setIsEmailSent(true)
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError('Ein unerwarteter Fehler ist aufgetreten')
       console.error('Error sending magic link:', err)
     } finally {
       setIsLoading(false)
@@ -65,15 +66,15 @@ function MagicLoginContent() {
             </div>
             
             <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-              Check your email
+              Prüfe deine E-Mails
             </h1>
             
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              We've sent a magic link to <span className="font-medium text-zinc-900 dark:text-white">{email}</span>
+              Wir haben einen Magic Link an <span className="font-medium text-zinc-900 dark:text-white">{email}</span> gesendet
             </p>
             
             <p className="text-sm text-zinc-500 dark:text-zinc-500">
-              Click the link in the email to sign in to your account.
+              Klicke auf den Link in der E-Mail, um dich in dein Konto anzumelden.
             </p>
           </div>
 
@@ -83,10 +84,11 @@ function MagicLoginContent() {
               onClick={() => {
                 setIsEmailSent(false)
                 setEmail('')
+                setAcceptedTerms(false)
               }}
               className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
             >
-              Try a different email address
+              Andere E-Mail-Adresse versuchen
             </button>
           </div>
         </div>
@@ -108,11 +110,11 @@ function MagicLoginContent() {
 
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-            Welcome back
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white font-[var(--font-cormorant)]">
+            KInvest
           </h1>
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Enter your email to receive a magic link
+            Gib deine E-Mail-Adresse ein, um einen Magic Link zu erhalten
           </p>
         </div>
 
@@ -138,7 +140,7 @@ function MagicLoginContent() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              Email address
+              E-Mail-Adresse
             </label>
             <input
               id="email"
@@ -149,13 +151,56 @@ function MagicLoginContent() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="block w-full rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-900 px-3 py-2.5 text-sm text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 transition-colors"
-              placeholder="Enter your email"
+              placeholder="E-Mail-Adresse eingeben"
             />
+          </div>
+
+          {/* Terms Checkbox */}
+          <div className="flex gap-3">
+            <div className="flex h-6 shrink-0 items-center">
+              <div className="group grid size-4 grid-cols-1">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  required
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="col-start-1 row-start-1 appearance-none rounded-sm border border-zinc-300 bg-white checked:border-blue-600 checked:bg-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:border-zinc-300 disabled:bg-zinc-100 disabled:checked:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-900 dark:checked:border-blue-500 dark:checked:bg-blue-500"
+                />
+                <svg
+                  fill="none"
+                  viewBox="0 0 14 14"
+                  className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-zinc-950/25"
+                >
+                  <path
+                    d="M3 8L6 11L11 3.5"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="opacity-0 group-has-checked:opacity-100"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="text-sm/6">
+              <label htmlFor="terms" className="text-zinc-500 dark:text-zinc-400">
+                Mit der Anmeldung stimmst du unseren{' '}
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                  Nutzungsbedingungen
+                </a>{' '}
+                und{' '}
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                  Datenschutzbestimmungen
+                </a>{' '}
+                zu.
+              </label>
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={isLoading || !email}
+            disabled={isLoading || !email || !acceptedTerms}
             className="w-full flex justify-center items-center rounded-lg bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 dark:disabled:bg-zinc-700 px-4 py-2.5 text-sm font-medium text-white disabled:text-zinc-500 dark:disabled:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900 transition-colors disabled:cursor-not-allowed"
           >
             {isLoading ? (
@@ -164,34 +209,32 @@ function MagicLoginContent() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Sending magic link...
+                Magic Link wird gesendet...
               </>
             ) : (
-              'Send magic link'
+              'Magic Link senden'
             )}
           </button>
         </form>
 
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-xs text-zinc-500 dark:text-zinc-500">
-            By signing in, you agree to our{' '}
+        {/* Footer entfernt - jetzt in der Checkbox */}
+
+        {/* Alternative Actions */}
+        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+          <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
+            Probleme?{' '}
             <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-              Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-              Privacy Policy
+              Support kontaktieren
             </a>
-          </p>
+          </div>
         </div>
 
         {/* Alternative Actions */}
         <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
           <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-            Having trouble?{' '}
+            Probleme?{' '}
             <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-              Contact support
+              Support kontaktieren
             </a>
           </div>
         </div>
@@ -212,7 +255,7 @@ export default function MagicLoginPage() {
           </div>
           <div className="text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Loading authentication...
+              Anmeldung wird geladen...
             </p>
           </div>
         </div>
