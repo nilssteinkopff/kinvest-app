@@ -228,16 +228,6 @@ function MagicLoginContent() {
             </a>
           </div>
         </div>
-
-        {/* Alternative Actions */}
-        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
-          <div className="text-center text-sm text-zinc-600 dark:text-zinc-400">
-            Probleme?{' '}
-            <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-              Support kontaktieren
-            </a>
-          </div>
-        </div>
       </div>
     </AuthLayout>
   )

@@ -20,14 +20,14 @@ import {
 const openSans = Open_Sans({ 
   subsets: ['latin'],
   variable: '--font-open-sans',
-  display: 'swap', // Add this for better loading
+  display: 'swap',
 })
 
 const cormorant = Cormorant_Garamond({ 
   subsets: ['latin'], 
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-cormorant',
-  display: 'swap', // Add this for better loading
+  display: 'swap',
 })
 
 const navigation = [
@@ -49,7 +49,7 @@ function classNames(...classes: string[]) {
 
 function LogoText() {
   return (
-    <span className="font-cormorant text-xl font-semibold text-white">
+    <span className="font-logo text-xl font-semibold text-white">
       KInvest.ai
     </span>
   )
@@ -85,7 +85,7 @@ export default function AppLayout({
   }
 
   return (
-    <div className={`${openSans.variable} ${cormorant.variable} font-open-sans`}>
+    <div className={`${openSans.variable} ${cormorant.variable} font-sans`}>
       <div className="h-full min-w-[320px] overflow-x-auto bg-white">
         <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
           <DialogBackdrop
