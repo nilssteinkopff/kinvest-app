@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { AuthLayout } from '@/components/auth-layout'
 
-export default function MagicLoginPage() {
+function MagicLoginContent() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isEmailSent, setIsEmailSent] = useState(false)
@@ -197,5 +197,28 @@ export default function MagicLoginPage() {
         </div>
       </div>
     </AuthLayout>
+  )
+}
+
+export default function MagicLoginPage() {
+  return (
+    <Suspense fallback={
+      <AuthLayout>
+        <div className="w-full max-w-sm space-y-8">
+          <div className="flex justify-center">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              Loading authentication...
+            </p>
+          </div>
+        </div>
+      </AuthLayout>
+    }>
+      <MagicLoginContent />
+    </Suspense>
   )
 }
