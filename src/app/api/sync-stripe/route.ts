@@ -140,3 +140,4 @@ export async function GET() {
     last_run: new Date().toISOString()
   })
 }
+// GET Endpoint für manuellen Trigger (Debug)
