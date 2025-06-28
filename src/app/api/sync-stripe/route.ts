@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { randomUUID } from 'crypto'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { 
   apiVersion: '2024-11-20.acacia' 
@@ -44,8 +45,9 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          // Direkt Profile erstellen ohne Auth User
+          // Profile mit generierter UUID erstellen
           const profileData = {
+            id: randomUUID(), // ✅ UUID generieren!
             email: customer.email,
             stripe_customer_id: customer.id,
             updated_at: new Date().toISOString()
@@ -98,7 +100,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    message: 'Stripe Sync Job (Direct Profile Creation)',
+    message: 'Stripe Sync Job (UUID Profile Creation)',
     usage: 'POST with Authorization header',
     last_run: new Date().toISOString()
   })
