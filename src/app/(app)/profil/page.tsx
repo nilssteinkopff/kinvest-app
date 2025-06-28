@@ -21,25 +21,25 @@ export default async function ProfilPage() {
       <div className="space-y-12">
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
           <div>
-            <h2 className="text-base/7 font-semibold text-gray-900">Profile</h2>
+            <h2 className="text-base/7 font-semibold text-gray-900">Profil</h2>
             <p className="mt-1 text-sm/6 text-gray-600">
-              This information will be displayed publicly so be careful what you share.
+              Diese Informationen werden öffentlich angezeigt, also sei vorsichtig mit dem, was du teilst.
             </p>
           </div>
 
           <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
             <div className="sm:col-span-4">
               <label htmlFor="username" className="block text-sm/6 font-medium text-gray-900">
-                Username
+                Benutzername
               </label>
               <div className="mt-2">
                 <div className="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
-                  <div className="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">workcation.com/</div>
+                  <div className="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">kinvest.ai/</div>
                   <input
                     id="username"
                     name="username"
                     type="text"
-                    placeholder="janesmith"
+                    placeholder="maxmustermann"
                     className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                   />
                 </div>
@@ -48,7 +48,7 @@ export default async function ProfilPage() {
 
             <div className="col-span-full">
               <label htmlFor="about" className="block text-sm/6 font-medium text-gray-900">
-                About
+                Über dich
               </label>
               <div className="mt-2">
                 <textarea
@@ -57,14 +57,15 @@ export default async function ProfilPage() {
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   defaultValue={''}
+                  placeholder="Erzähle etwas über dich und deine Investment-Erfahrung..."
                 />
               </div>
-              <p className="mt-3 text-sm/6 text-gray-600">Write a few sentences about yourself.</p>
+              <p className="mt-3 text-sm/6 text-gray-600">Schreibe ein paar Sätze über dich.</p>
             </div>
 
             <div className="col-span-full">
               <label htmlFor="photo" className="block text-sm/6 font-medium text-gray-900">
-                Photo
+                Profilbild
               </label>
               <div className="mt-2 flex items-center gap-x-3">
                 <UserCircleIcon aria-hidden="true" className="size-12 text-gray-300" />
@@ -72,14 +73,14 @@ export default async function ProfilPage() {
                   type="button"
                   className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50"
                 >
-                  Change
+                  Ändern
                 </button>
               </div>
             </div>
 
             <div className="col-span-full">
               <label htmlFor="cover-photo" className="block text-sm/6 font-medium text-gray-900">
-                Cover photo
+                Titelbild
               </label>
               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                 <div className="text-center">
@@ -89,12 +90,12 @@ export default async function ProfilPage() {
                       htmlFor="file-upload"
                       className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
                     >
-                      <span>Upload a file</span>
+                      <span>Datei hochladen</span>
                       <input id="file-upload" name="file-upload" type="file" className="sr-only" />
                     </label>
-                    <p className="pl-1">or drag and drop</p>
+                    <p className="pl-1">oder per Drag & Drop</p>
                   </div>
-                  <p className="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
+                  <p className="text-xs/5 text-gray-600">PNG, JPG, GIF bis zu 10MB</p>
                 </div>
               </div>
             </div>
@@ -103,14 +104,14 @@ export default async function ProfilPage() {
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
           <div>
-            <h2 className="text-base/7 font-semibold text-gray-900">Personal Information</h2>
-            <p className="mt-1 text-sm/6 text-gray-600">Use a permanent address where you can receive mail.</p>
+            <h2 className="text-base/7 font-semibold text-gray-900">Persönliche Informationen</h2>
+            <p className="mt-1 text-sm/6 text-gray-600">Verwende eine dauerhafte Adresse, unter der du Post erhalten kannst.</p>
           </div>
 
           <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
             <div className="sm:col-span-3">
               <label htmlFor="first-name" className="block text-sm/6 font-medium text-gray-900">
-                First name
+                Vorname
               </label>
               <div className="mt-2">
                 <input
@@ -126,7 +127,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-3">
               <label htmlFor="last-name" className="block text-sm/6 font-medium text-gray-900">
-                Last name
+                Nachname
               </label>
               <div className="mt-2">
                 <input
@@ -142,7 +143,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-4">
               <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                Email address
+                E-Mail-Adresse
               </label>
               <div className="mt-2">
                 <input
@@ -158,7 +159,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-3">
               <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
-                Country
+                Land
               </label>
               <div className="mt-2 grid grid-cols-1">
                 <select
@@ -167,12 +168,12 @@ export default async function ProfilPage() {
                   autoComplete="country-name"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
-                  <option>Germany</option>
-                  <option>Austria</option>
-                  <option>Switzerland</option>
-                  <option>United States</option>
-                  <option>Canada</option>
-                  <option>Mexico</option>
+                  <option>Deutschland</option>
+                  <option>Österreich</option>
+                  <option>Schweiz</option>
+                  <option>Niederlande</option>
+                  <option>Belgien</option>
+                  <option>Luxemburg</option>
                 </select>
                 <ChevronDownIcon
                   aria-hidden="true"
@@ -183,7 +184,7 @@ export default async function ProfilPage() {
 
             <div className="col-span-full">
               <label htmlFor="street-address" className="block text-sm/6 font-medium text-gray-900">
-                Street address
+                Straße und Hausnummer
               </label>
               <div className="mt-2">
                 <input
@@ -191,6 +192,7 @@ export default async function ProfilPage() {
                   name="street-address"
                   type="text"
                   autoComplete="street-address"
+                  placeholder="Musterstraße 123"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -198,7 +200,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-2 sm:col-start-1">
               <label htmlFor="city" className="block text-sm/6 font-medium text-gray-900">
-                City
+                Stadt
               </label>
               <div className="mt-2">
                 <input
@@ -206,6 +208,7 @@ export default async function ProfilPage() {
                   name="city"
                   type="text"
                   autoComplete="address-level2"
+                  placeholder="Berlin"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -213,7 +216,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-2">
               <label htmlFor="region" className="block text-sm/6 font-medium text-gray-900">
-                State / Province
+                Bundesland / Region
               </label>
               <div className="mt-2">
                 <input
@@ -221,6 +224,7 @@ export default async function ProfilPage() {
                   name="region"
                   type="text"
                   autoComplete="address-level1"
+                  placeholder="Berlin"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -228,7 +232,7 @@ export default async function ProfilPage() {
 
             <div className="sm:col-span-2">
               <label htmlFor="postal-code" className="block text-sm/6 font-medium text-gray-900">
-                ZIP / Postal code
+                Postleitzahl
               </label>
               <div className="mt-2">
                 <input
@@ -236,6 +240,7 @@ export default async function ProfilPage() {
                   name="postal-code"
                   type="text"
                   autoComplete="postal-code"
+                  placeholder="10115"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -248,7 +253,7 @@ export default async function ProfilPage() {
           <div>
             <h2 className="text-base/7 font-semibold text-gray-900">Freunde einladen</h2>
             <p className="mt-1 text-sm/6 text-gray-600">
-              Teilen Sie Ihre persönliche Referral-ID mit Freunden und erhalten Sie Belohnungen für jede erfolgreiche Empfehlung.
+              Teile deinen persönlichen Referral-Link mit Freunden und erhalte Belohnungen für jede erfolgreiche Empfehlung.
             </p>
           </div>
 
@@ -265,7 +270,7 @@ export default async function ProfilPage() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-yellow-700">
-                      Referral-ID wird generiert... Falls diese nicht erscheint, kontaktieren Sie den Support.
+                      Referral-ID wird generiert... Falls diese nicht erscheint, kontaktiere den Support.
                     </p>
                   </div>
                 </div>
@@ -284,7 +289,7 @@ export default async function ProfilPage() {
               </div>
               {profile?.has_beta_access && (
                 <div className="flex items-center justify-between text-sm mt-2">
-                  <span className="text-gray-600">Beta Access:</span>
+                  <span className="text-gray-600">Beta Zugang:</span>
                   <span className="text-purple-600 font-medium">🚀 Beta Nutzer</span>
                 </div>
               )}
@@ -296,13 +301,13 @@ export default async function ProfilPage() {
           <div>
             <h2 className="text-base/7 font-semibold text-gray-900">Benachrichtigungen</h2>
             <p className="mt-1 text-sm/6 text-gray-600">
-              We'll always let you know about important changes, but you pick what else you want to hear about.
+              Wir informieren dich immer über wichtige Änderungen, aber du kannst auswählen, worüber du sonst noch informiert werden möchtest.
             </p>
           </div>
 
           <div className="max-w-2xl space-y-10 md:col-span-2">
             <fieldset>
-              <legend className="text-sm/6 font-semibold text-gray-900">By email</legend>
+              <legend className="text-sm/6 font-semibold text-gray-900">Per E-Mail</legend>
               <div className="mt-6 space-y-6">
                 <div className="flex gap-3">
                   <div className="flex h-6 shrink-0 items-center">
@@ -433,7 +438,7 @@ export default async function ProfilPage() {
 
             <fieldset>
               <legend className="text-sm/6 font-semibold text-gray-900">Push Benachrichtigungen</legend>
-              <p className="mt-1 text-sm/6 text-gray-600">These are delivered via SMS to your mobile phone.</p>
+              <p className="mt-1 text-sm/6 text-gray-600">Diese werden als SMS an dein Handy gesendet.</p>
               <div className="mt-6 space-y-6">
                 <div className="flex items-center gap-x-3">
                   <input
@@ -444,7 +449,7 @@ export default async function ProfilPage() {
                     className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
                   />
                   <label htmlFor="push-everything" className="block text-sm/6 font-medium text-gray-900">
-                    Everything
+                    Alles
                   </label>
                 </div>
                 <div className="flex items-center gap-x-3">
@@ -455,7 +460,7 @@ export default async function ProfilPage() {
                     className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
                   />
                   <label htmlFor="push-email" className="block text-sm/6 font-medium text-gray-900">
-                    Same as email
+                    Wie bei E-Mail
                   </label>
                 </div>
                 <div className="flex items-center gap-x-3">
@@ -466,7 +471,7 @@ export default async function ProfilPage() {
                     className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 forced-colors:appearance-auto forced-colors:before:hidden"
                   />
                   <label htmlFor="push-nothing" className="block text-sm/6 font-medium text-gray-900">
-                    No push notifications
+                    Keine Push Benachrichtigungen
                   </label>
                 </div>
               </div>
@@ -477,13 +482,13 @@ export default async function ProfilPage() {
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
         <button type="button" className="text-sm/6 font-semibold text-gray-900">
-          Cancel
+          Abbrechen
         </button>
         <button
           type="submit"
           className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          Save
+          Speichern
         </button>
       </div>
       
