@@ -8,13 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
 export async function POST(req: NextRequest) {
@@ -28,12 +22,10 @@ export async function POST(req: NextRequest) {
 
     const syncResults = {
       customers_synced: 0,
-      subscriptions_synced: 0,
-      users_created: 0,
+      profiles_created: 0,
       errors: [] as string[]
     }
 
-    // Alle Stripe Kunden abrufen
     console.log('📊 Fetching Stripe customers...')
     
     let hasMore = true
@@ -42,8 +34,7 @@ export async function POST(req: NextRequest) {
     while (hasMore) {
       const customers = await stripe.customers.list({
         limit: 100,
-        starting_after: startingAfter,
-        expand: ['data.subscriptions']
+        starting_after: startingAfter
       })
 
       for (const customer of customers.data) {
@@ -53,8 +44,28 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          await syncCustomerToSupabase(customer)
+          // Direkt Profile erstellen ohne Auth User
+          const profileData = {
+            email: customer.email,
+            stripe_customer_id: customer.id,
+            updated_at: new Date().toISOString()
+          }
+
+          const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .upsert(profileData, { 
+              onConflict: 'stripe_customer_id',
+              ignoreDuplicates: false 
+            })
+
+          if (profileError) {
+            throw new Error(`Profile upsert failed: ${profileError.message}`)
+          }
+
           syncResults.customers_synced++
+          syncResults.profiles_created++
+          console.log('✅ Profile created:', customer.email)
+
         } catch (error) {
           const errorMsg = `Customer ${customer.id}: ${error instanceof Error ? error.message : 'Unknown error'}`
           console.error('❌', errorMsg)
@@ -85,57 +96,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function syncCustomerToSupabase(customer: Stripe.Customer) {
-  if (!customer.email) return
-
-  console.log('👤 Syncing customer:', customer.email)
-
-  const { data: existingUser, error: userFindError } = await supabaseAdmin.auth.admin.getUserByEmail(customer.email)
-  
-  let userId: string
-
-  if (userFindError || !existingUser.user) {
-    console.log('👤 Creating new user:', customer.email)
-    const { data: newUser, error: userCreateError } = await supabaseAdmin.auth.admin.createUser({
-      email: customer.email,
-      email_confirm: true,
-      user_metadata: { 
-        created_via: 'stripe_sync',
-        stripe_customer_id: customer.id,
-        synced_at: new Date().toISOString()
-      }
-    })
-    
-    if (userCreateError || !newUser.user) {
-      throw new Error(`Failed to create user: ${userCreateError?.message}`)
-    }
-    userId = newUser.user.id
-  } else {
-    userId = existingUser.user.id
-  }
-
-  const profileData = {
-    id: userId,
-    email: customer.email,
-    stripe_customer_id: customer.id,
-    updated_at: new Date().toISOString()
-  }
-
-  const { error: profileError } = await supabaseAdmin
-    .from('profiles')
-    .upsert(profileData, { 
-      onConflict: 'id',
-      ignoreDuplicates: false 
-    })
-
-  if (profileError) {
-    throw new Error(`Profile upsert failed: ${profileError.message}`)
-  }
-}
-
 export async function GET() {
   return NextResponse.json({
-    message: 'Stripe Sync Job Endpoint',
+    message: 'Stripe Sync Job (Direct Profile Creation)',
     usage: 'POST with Authorization header',
     last_run: new Date().toISOString()
   })
