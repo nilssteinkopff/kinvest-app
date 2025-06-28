@@ -3,6 +3,10 @@
     {
       "path": "/api/sync-stripe",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/portfolio/update",
+      "schedule": "0 */1 * * *"
     }
   ],
   "functions": {
@@ -11,6 +15,12 @@
     },
     "src/app/api/sync-stripe/route.ts": {
       "maxDuration": 300
+    },
+    "src/app/api/portfolio/update/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/portfolio/performance/route.ts": {
+      "maxDuration": 60
     }
   }
 }
