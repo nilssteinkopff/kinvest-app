@@ -47,23 +47,36 @@ export default async function ProfilPage() {
             <div className="mt-6">
               <div className="bg-gray-50 rounded-xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      profile?.subscription_status === 'active' 
-                        ? 'bg-green-500' 
-                        : 'bg-yellow-500'
-                    }`}></div>
-                    <div>
+                  <div>
+                    {/* Status mit Punkt */}
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        profile?.subscription_status === 'active' 
+                          ? 'bg-green-500' 
+                          : 'bg-yellow-500'
+                      }`}></div>
                       <p className="text-sm/6 font-medium text-gray-900">
                         Status: {profile?.subscription_status === 'active' ? 'Aktives Abonnement' : 'Inaktiv'}
                       </p>
-                      <p className={`text-xs font-medium ${
-                        profile?.has_beta_access 
-                          ? 'text-purple-600' 
-                          : 'text-gray-500'
-                      }`}>
-                        {profile?.has_beta_access ? '🚀 Beta-Zugang aktiv' : 'Kein Beta-Zugang'}
-                      </p>
+                    </div>
+                    
+                    {/* Beta Access Badge */}
+                    <div className="mt-2">
+                      {profile?.has_beta_access ? (
+                        <span className="inline-flex items-center gap-x-1.5 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                          <svg className="h-1.5 w-1.5 fill-green-500" viewBox="0 0 6 6" aria-hidden="true">
+                            <circle cx={3} cy={3} r={3} />
+                          </svg>
+                          🚀 Beta-Zugang aktiv
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-x-1.5 rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20">
+                          <svg className="h-1.5 w-1.5 fill-orange-500" viewBox="0 0 6 6" aria-hidden="true">
+                            <circle cx={3} cy={3} r={3} />
+                          </svg>
+                          Kein Zugang zu Beta-Funktionen
+                        </span>
+                      )}
                     </div>
                   </div>
                   

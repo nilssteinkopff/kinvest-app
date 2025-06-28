@@ -2,8 +2,8 @@
 
 import { Open_Sans, Cormorant_Garamond } from 'next/font/google'
 import '../globals.css'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
 import {
@@ -30,17 +30,18 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
 })
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon, current: true },
-  { name: 'Portfolio', href: '/portfolio', icon: BriefcaseIcon, current: false },
-  { name: 'Neuigkeiten', href: '/news', icon: NewspaperIcon, current: false },
-  { name: 'Wissen', href: '/knowledge', icon: AcademicCapIcon, current: false },
+// Basis-Navigation ohne current Property
+const navigationBase = [
+  { name: 'Dashboard', href: '/', icon: HomeIcon },
+  { name: 'Portfolio', href: '/portfolio', icon: BriefcaseIcon },
+  { name: 'Neuigkeiten', href: '/news', icon: NewspaperIcon },
+  { name: 'Wissen', href: '/knowledge', icon: AcademicCapIcon },
 ]
 
-const portfolios = [
-  { id: 1, name: 'Tech Stocks', href: '/portfolio/tech', initial: 'T', current: false },
-  { id: 2, name: 'Crypto Fund', href: '/portfolio/crypto', initial: 'C', current: false },
-  { id: 3, name: 'Blue Chips', href: '/portfolio/bluechips', initial: 'B', current: false },
+const portfoliosBase = [
+  { id: 1, name: 'Tech Stocks', href: '/portfolio/tech', initial: 'T' },
+  { id: 2, name: 'Crypto Fund', href: '/portfolio/crypto', initial: 'C' },
+  { id: 3, name: 'Blue Chips', href: '/portfolio/bluechips', initial: 'B' },
 ]
 
 function classNames(...classes: string[]) {
@@ -62,8 +63,40 @@ export default function AppLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  // Hydration-safe: Erst nach dem Mount die Navigation aktivieren
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Dynamisch current Property basierend auf aktueller Route setzen
+  // Aber nur nach dem Mount, um Hydration-Mismatch zu vermeiden
+  const navigation = navigationBase.map(item => {
+    if (!isMounted) {
+      // Während SSR/Hydration: keine Navigation aktiv
+      return { ...item, current: false }
+    }
+    
+    // Nach Mount: echte Route-Erkennung
+    if (item.href === '/') {
+      // Dashboard ist aktiv für '/' oder '/dashboard'
+      return { ...item, current: pathname === '/' || pathname === '/dashboard' }
+    }
+    
+    return {
+      ...item,
+      current: pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
+    }
+  })
+
+  const portfolios = portfoliosBase.map(portfolio => ({
+    ...portfolio,
+    current: isMounted ? pathname === portfolio.href : false
+  }))
 
   const handleLogout = async () => {
     if (isLoggingOut) return
@@ -82,6 +115,18 @@ export default function AppLayout({
     } finally {
       setIsLoggingOut(false)
     }
+  }
+
+  // Titel für mobile Ansicht basierend auf aktueller Route
+  const getPageTitle = () => {
+    if (!isMounted) return 'Dashboard' // Default während Hydration
+    
+    const currentNavItem = navigation.find(item => item.current)
+    const currentPortfolio = portfolios.find(portfolio => portfolio.current)
+    
+    if (currentPortfolio) return currentPortfolio.name
+    if (currentNavItem) return currentNavItem.name
+    return 'Dashboard'
   }
 
   return (
@@ -126,6 +171,7 @@ export default function AppLayout({
                                   : 'text-gray-400 hover:bg-gray-800 hover:text-white',
                                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
                               )}
+                              suppressHydrationWarning
                             >
                               <item.icon aria-hidden="true" className="size-6 shrink-0" />
                               <span className="truncate">{item.name}</span>
@@ -147,6 +193,7 @@ export default function AppLayout({
                                   : 'text-gray-400 hover:bg-gray-800 hover:text-white',
                                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
                               )}
+                              suppressHydrationWarning
                             >
                               <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
                                 {portfolio.initial}
@@ -157,7 +204,6 @@ export default function AppLayout({
                         ))}
                       </ul>
                     </li>
-                    {/* Mobile Logout in Sidebar */}
                     <li className="-mx-6 mt-auto">
                       <div className="space-y-1">
                         <a
@@ -206,6 +252,7 @@ export default function AppLayout({
                               : 'text-gray-400 hover:bg-gray-800 hover:text-white',
                             'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
                           )}
+                          suppressHydrationWarning
                         >
                           <item.icon aria-hidden="true" className="size-6 shrink-0" />
                           <span className="truncate">{item.name}</span>
@@ -227,6 +274,7 @@ export default function AppLayout({
                               : 'text-gray-400 hover:bg-gray-800 hover:text-white',
                             'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
                           )}
+                          suppressHydrationWarning
                         >
                           <span className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-700 bg-gray-800 text-[0.625rem] font-medium text-gray-400 group-hover:text-white">
                             {portfolio.initial}
@@ -269,7 +317,9 @@ export default function AppLayout({
             <span className="sr-only">Open sidebar</span>
             <Bars3Icon aria-hidden="true" className="size-6" />
           </button>
-          <div className="flex-1 text-sm/6 font-semibold text-white truncate">Dashboard</div>
+          <div className="flex-1 text-sm/6 font-semibold text-white truncate" suppressHydrationWarning>
+            {getPageTitle()}
+          </div>
           
           {/* Mobile Profile Dropdown */}
           <div className="flex items-center gap-x-3">

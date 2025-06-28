@@ -1,417 +1,271 @@
 'use client'
 
 import { useState } from 'react'
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
+import { ChevronRightIcon, ClockIcon, FireIcon, GlobeAltIcon, ChartBarIcon, CpuChipIcon, HeartIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+const categories = [
+  { id: 'all', name: 'Alle', icon: GlobeAltIcon, color: 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300' },
+  { id: 'trending', name: 'Trending', icon: FireIcon, color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 hover:border-orange-300' },
+  { id: 'business', name: 'Business', icon: ChartBarIcon, color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300' },
+  { id: 'technology', name: 'Technologie', icon: CpuChipIcon, color: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 hover:border-violet-300' },
+  { id: 'health', name: 'Gesundheit', icon: HeartIcon, color: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300' }
+]
 
-const data = [
-  { date: 'Aug 01', 'ETF Shares Vital': 2100.2, 'Vitainvest Core': 4434.1, 'iShares Tech Growth': 7943.2 },
-  { date: 'Aug 02', 'ETF Shares Vital': 2943.0, 'Vitainvest Core': 4954.1, 'iShares Tech Growth': 8954.1 },
-  { date: 'Aug 03', 'ETF Shares Vital': 4889.5, 'Vitainvest Core': 6100.2, 'iShares Tech Growth': 9123.7 },
-  { date: 'Aug 04', 'ETF Shares Vital': 3909.8, 'Vitainvest Core': 4909.7, 'iShares Tech Growth': 7478.4 },
-  { date: 'Aug 05', 'ETF Shares Vital': 5778.7, 'Vitainvest Core': 7103.1, 'iShares Tech Growth': 9504.3 },
-  { date: 'Aug 06', 'ETF Shares Vital': 5900.9, 'Vitainvest Core': 7534.3, 'iShares Tech Growth': 9943.4 },
-  { date: 'Aug 07', 'ETF Shares Vital': 4129.4, 'Vitainvest Core': 7412.1, 'iShares Tech Growth': 10112.2 },
-  { date: 'Aug 08', 'ETF Shares Vital': 6021.2, 'Vitainvest Core': 7834.4, 'iShares Tech Growth': 10290.2 },
-  { date: 'Aug 09', 'ETF Shares Vital': 6279.8, 'Vitainvest Core': 8159.1, 'iShares Tech Growth': 10349.6 },
-  { date: 'Aug 10', 'ETF Shares Vital': 6224.5, 'Vitainvest Core': 8260.6, 'iShares Tech Growth': 10415.4 },
-  { date: 'Aug 11', 'ETF Shares Vital': 6380.6, 'Vitainvest Core': 8965.3, 'iShares Tech Growth': 10636.3 },
-  { date: 'Aug 12', 'ETF Shares Vital': 6414.4, 'Vitainvest Core': 7989.3, 'iShares Tech Growth': 10900.5 },
-  { date: 'Aug 13', 'ETF Shares Vital': 6540.1, 'Vitainvest Core': 7839.6, 'iShares Tech Growth': 11040.4 },
-  { date: 'Aug 14', 'ETF Shares Vital': 6634.4, 'Vitainvest Core': 7343.8, 'iShares Tech Growth': 11390.5 },
-  { date: 'Aug 15', 'ETF Shares Vital': 7124.6, 'Vitainvest Core': 6903.7, 'iShares Tech Growth': 11423.1 },
-  { date: 'Aug 16', 'ETF Shares Vital': 7934.5, 'Vitainvest Core': 6273.6, 'iShares Tech Growth': 12134.4 },
-  { date: 'Aug 17', 'ETF Shares Vital': 10287.8, 'Vitainvest Core': 5900.3, 'iShares Tech Growth': 12034.4 },
-  { date: 'Aug 18', 'ETF Shares Vital': 10323.2, 'Vitainvest Core': 5732.1, 'iShares Tech Growth': 11011.7 },
-  { date: 'Aug 19', 'ETF Shares Vital': 10511.4, 'Vitainvest Core': 5523.1, 'iShares Tech Growth': 11834.8 },
-  { date: 'Aug 20', 'ETF Shares Vital': 11043.9, 'Vitainvest Core': 5422.3, 'iShares Tech Growth': 12387.1 },
-  { date: 'Sep 01', 'ETF Shares Vital': 12347.2, 'Vitainvest Core': 4839.1, 'iShares Tech Growth': 14532.1 },
-  { date: 'Sep 05', 'ETF Shares Vital': 12489.5, 'Vitainvest Core': 5741.1, 'iShares Tech Growth': 13539.2 },
-  { date: 'Sep 10', 'ETF Shares Vital': 13649.0, 'Vitainvest Core': 10139.2, 'iShares Tech Growth': 11143.8 },
-  { date: 'Sep 15', 'ETF Shares Vital': 12012.8, 'Vitainvest Core': 11412.3, 'iShares Tech Growth': 7100.4 },
-  { date: 'Sep 20', 'ETF Shares Vital': 13132.6, 'Vitainvest Core': 12132.3, 'iShares Tech Growth': 6900.2 },
-  { date: 'Sep 25', 'ETF Shares Vital': 15967.5, 'Vitainvest Core': 9700.1, 'iShares Tech Growth': 4123.2 },
-  { date: 'Sep 26', 'ETF Shares Vital': 17349.3, 'Vitainvest Core': 10943.4, 'iShares Tech Growth': 3935.1 },
-];
-
-const summary = [
+const newsData = [
   {
-    name: 'ETF Shares Vital',
-    value: '$21,349.36',
-    invested: '$19,698.65',
-    cashflow: '$14,033.74',
-    gain: '+$11,012.39',
-    realized: '+$177.48',
-    dividends: '+$490.97',
-    bgColor: 'bg-blue-500',
-    lineColor: '#3b82f6',
-    changeType: 'positive',
+    id: 1,
+    category: 'trending',
+    title: 'KI-Revolution: OpenAI kündigt bahnbrechende neue Features an',
+    excerpt: 'Das Unternehmen präsentiert revolutionäre Funktionen, die die Art wie wir mit künstlicher Intelligenz interagieren fundamental verändern könnten.',
+    author: 'Sarah Chen',
+    publishedAt: '2 Stunden',
+    readTime: '4 Min',
+    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['KI', 'OpenAI', 'Innovation'],
+    featured: true
   },
   {
-    name: 'Vitainvest Core',
-    value: '$25,943.43',
-    invested: '$23,698.65',
-    cashflow: '$11,033.74',
-    gain: '+$3,012.39',
-    realized: '+$565.41',
-    dividends: '+$290.97',
-    bgColor: 'bg-violet-500',
-    lineColor: '#8b5cf6',
-    changeType: 'positive',
+    id: 2,
+    category: 'business',
+    title: 'Börsen erreichen neue Rekordhöhen trotz globaler Unsicherheiten',
+    excerpt: 'Investoren zeigen sich optimistisch während die wichtigsten Aktienindizes neue Allzeithochs markieren.',
+    author: 'Michael Weber',
+    publishedAt: '4 Stunden',
+    readTime: '3 Min',
+    image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Börse', 'Finanzen', 'Rekord']
   },
   {
-    name: 'iShares Tech Growth',
-    value: '$9,443.46',
-    invested: '$14,698.65',
-    cashflow: '$2,033.74',
-    gain: '-$5,012.39',
-    realized: '-$634.42',
-    dividends: '-$990.97',
-    bgColor: 'bg-fuchsia-500',
-    lineColor: '#d946ef',
-    changeType: 'negative',
+    id: 3,
+    category: 'technology',
+    title: 'Quantencomputer-Durchbruch: IBM meldet 50% Leistungssteigerung',
+    excerpt: 'Der neue Quantenprozessor verspricht signifikante Verbesserungen bei der Lösung komplexer Berechnungen.',
+    author: 'Dr. Anna Müller',
+    publishedAt: '6 Stunden',
+    readTime: '5 Min',
+    image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Quantencomputer', 'IBM', 'Durchbruch']
   },
-];
-
-const valueFormatter = (number) =>
-  `$${Intl.NumberFormat('us').format(number).toString()}`;
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-        <p className="text-sm font-medium text-gray-900 mb-2">{label}</p>
-        {payload.map((entry, index) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.name}: {valueFormatter(entry.value)}
-          </p>
-        ))}
-      </div>
-    );
+  {
+    id: 4,
+    category: 'health',
+    title: 'Neue Studie zeigt vielversprechende Ergebnisse für Alzheimer-Therapie',
+    excerpt: 'Forscher haben einen innovativen Behandlungsansatz entwickelt, der das Fortschreiten der Krankheit verlangsamen könnte.',
+    author: 'Prof. Thomas Klein',
+    publishedAt: '8 Stunden',
+    readTime: '6 Min',
+    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Alzheimer', 'Forschung', 'Therapie']
+  },
+  {
+    id: 5,
+    category: 'trending',
+    title: 'SpaceX gelingt erneut spektakuläre Raketenerholung',
+    excerpt: 'Die Falcon Heavy absolvierte eine weitere erfolgreiche Mission und landete sicher zurück auf der Erde.',
+    author: 'Lisa Rodriguez',
+    publishedAt: '12 Stunden',
+    readTime: '3 Min',
+    image: 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['SpaceX', 'Raumfahrt', 'Innovation']
+  },
+  {
+    id: 6,
+    category: 'business',
+    title: 'Deutsche Startups erhalten Rekordinvestitionen in 2025',
+    excerpt: 'Venture Capital Firmen investieren verstärkt in innovative deutsche Technologie-Unternehmen.',
+    author: 'Alexander Hoffmann',
+    publishedAt: '1 Tag',
+    readTime: '4 Min',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Startups', 'Investment', 'Deutschland']
+  },
+  {
+    id: 7,
+    category: 'technology',
+    title: 'Apple kündigt revolutionäres AR-Headset für Entwickler an',
+    excerpt: 'Das neue Gerät soll die Grenzen zwischen digitaler und physischer Welt weiter verwischen.',
+    author: 'Jennifer Park',
+    publishedAt: '1 Tag',
+    readTime: '5 Min',
+    image: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc07d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Apple', 'AR', 'Headset']
+  },
+  {
+    id: 8,
+    category: 'health',
+    title: 'Personalisierte Medizin: KI hilft bei maßgeschneiderten Therapien',
+    excerpt: 'Künstliche Intelligenz ermöglicht es Ärzten, individuelle Behandlungspläne für jeden Patienten zu erstellen.',
+    author: 'Dr. Maria Gonzalez',
+    publishedAt: '2 Tage',
+    readTime: '7 Min',
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    tags: ['Medizin', 'KI', 'Personalisierung']
   }
-  return null;
-};
+]
 
-export default function Portfolio() {
+export default function Newsfeed() {
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  
+  const filteredNews = selectedCategory === 'all' 
+    ? newsData 
+    : newsData.filter(article => article.category === selectedCategory)
+
   return (
-    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 space-y-6 sm:space-y-8 min-w-[320px]">
-      <div className="min-w-0">
-        <h3 className="text-xs sm:text-sm text-gray-600 truncate">Portfolio performance</h3>
-        <p className="mt-1 text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 truncate">$32,227.40</p>
-        <p className="mt-1 text-xs sm:text-sm font-medium">
-          <span className="text-emerald-700">+$430.90 (4.1%)</span>{' '}
-          <span className="font-normal text-gray-600 hidden sm:inline">Letzte 30 Tage</span>
-          <span className="font-normal text-gray-600 sm:hidden">30 Tage</span>
-        </p>
-      </div>
-
-      <div className="hidden sm:block min-w-0">
-        <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="date" 
-              className="text-gray-500 text-sm"
-              tick={{ fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              interval="preserveStartEnd"
-            />
-            <YAxis 
-              className="text-gray-500 text-sm"
-              tick={{ fontSize: 10 }}
-              tickFormatter={valueFormatter}
-              width={50}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '12px' }} />
-            <Line
-              type="monotone"
-              dataKey="ETF Shares Vital"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={false}
-              name="ETF Shares"
-            />
-            <Line
-              type="monotone"
-              dataKey="Vitainvest Core"
-              stroke="#8b5cf6"
-              strokeWidth={2}
-              dot={false}
-              name="Vitainvest"
-            />
-            <Line
-              type="monotone"
-              dataKey="iShares Tech Growth"
-              stroke="#d946ef"
-              strokeWidth={2}
-              dot={false}
-              name="iShares Tech"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="block sm:hidden min-w-0">
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" strokeOpacity={0.5} />
-            <XAxis 
-              dataKey="date" 
-              tick={false}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis 
-              hide={false}
-              tick={{ fontSize: 10 }}
-              tickFormatter={(value) => `${(value/1000).toFixed(0)}k`}
-              width={35}
-              axisLine={false}
-              tickLine={false}
-              className="text-gray-400"
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="ETF Shares Vital"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="Vitainvest Core"
-              stroke="#8b5cf6"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="iShares Tech Growth"
-              stroke="#d946ef"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="mt-6 sm:mt-8 min-w-0">
-        {/* Mobile View - Disclosure List */}
-        <div className="sm:hidden">
-          <div className="border-t border-gray-100">
-            <dl className="divide-y divide-gray-100">
-              {summary.map((item, index) => (
-                <Disclosure key={item.name} as="div" className="py-4">
-                  <dt>
-                    <DisclosureButton className="group flex w-full items-center justify-between text-left">
-                      <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span
-                          className={classNames(item.bgColor, 'w-1 h-6 rounded flex-shrink-0')}
-                          aria-hidden={true}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="text-sm font-medium text-gray-900 block truncate">
-                            {item.name}
-                          </span>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <div className="text-xs text-gray-500">
-                              Dividends: <span className={classNames(
-                                item.changeType === 'positive'
-                                  ? 'text-emerald-700'
-                                  : 'text-red-700',
-                                'font-medium'
-                              )}>
-                                {item.dividends}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <span className="ml-6 flex h-7 items-center">
-                        <PlusSmallIcon aria-hidden="true" className="size-5 group-data-[open]:hidden text-gray-400" />
-                        <MinusSmallIcon aria-hidden="true" className="size-5 hidden group-data-[open]:block text-gray-400" />
-                      </span>
-                    </DisclosureButton>
-                  </dt>
-                  <DisclosurePanel as="dd" className="mt-4 pr-12">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Value</div>
-                          <div className="text-sm font-medium text-gray-900">{item.value}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Invested</div>
-                          <div className="text-sm font-medium text-gray-900">{item.invested}</div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Gain</div>
-                          <div className={classNames(
-                            item.changeType === 'positive'
-                              ? 'text-emerald-700'
-                              : 'text-red-700',
-                            'text-sm font-medium'
-                          )}>
-                            {item.gain}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Realized</div>
-                          <div className={classNames(
-                            item.changeType === 'positive'
-                              ? 'text-emerald-700'
-                              : 'text-red-700',
-                            'text-sm font-medium'
-                          )}>
-                            {item.realized}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Cashflow</div>
-                          <div className="text-sm font-medium text-gray-900">{item.cashflow}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </DisclosurePanel>
-                </Disclosure>
-              ))}
-            </dl>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl mb-6">
+            <SparklesIcon className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-slate-900 via-blue-900 to-violet-900 bg-clip-text text-transparent mb-4">
+            News Feed
+          </h1>
+          <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Entdecken Sie die neuesten Nachrichten aus Technologie, Business und Wissenschaft
+          </p>
         </div>
 
-        {/* Desktop View - Table */}
-        <table className="w-full border-collapse hidden sm:table">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="py-2 sm:py-3.5 pl-1 sm:pl-2 pr-1 sm:pr-2 text-left text-xs sm:text-sm font-semibold text-gray-900">
-                Name
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 sm:hidden">
-                Dividends
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden sm:table-cell">
-                Value
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden sm:table-cell">
-                Gain
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden md:table-cell">
-                Realized
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden lg:table-cell">
-                Invested
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden xl:table-cell">
-                Dividends
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden md:table-cell lg:table-cell xl:hidden">
-                Dividends
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {summary.map((item) => (
-              <tr key={item.name}>
-                <td className="py-2 sm:py-3 pl-1 sm:pl-2 pr-1 sm:pr-2 text-xs sm:text-sm font-medium text-gray-900">
-                  <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
-                    <span
-                      className={classNames(item.bgColor, 'w-1 h-4 sm:h-6 rounded flex-shrink-0')}
-                      aria-hidden={true}
-                    />
-                    <span className="truncate text-xs sm:text-sm leading-tight">
-                      <span className="sm:hidden">{item.name.split(' ')[0]}</span>
-                      <span className="hidden sm:inline">{item.name}</span>
-                    </span>
+        {/* Category Filter */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
+          {categories.map((category) => {
+            const Icon = category.icon
+            const isActive = selectedCategory === category.id
+            return (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border font-medium text-sm transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white border-transparent shadow-lg shadow-blue-500/25' 
+                    : category.color
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {category.name}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Featured Article */}
+        {selectedCategory === 'all' && (
+          <div className="mb-12">
+            {(() => {
+              const featured = newsData.find(article => article.featured)
+              if (!featured) return null
+              
+              return (
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 shadow-2xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-violet-600/20"></div>
+                  <div className="relative grid lg:grid-cols-2 gap-8 p-8 lg:p-12">
+                    <div className="flex flex-col justify-center space-y-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/20 text-orange-300 text-sm font-medium rounded-full w-fit">
+                        <FireIcon className="w-4 h-4" />
+                        Featured Story
+                      </div>
+                      <h2 className="text-3xl lg:text-4xl font-bold text-white leading-tight">
+                        {featured.title}
+                      </h2>
+                      <p className="text-slate-300 text-lg leading-relaxed">
+                        {featured.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-slate-400 text-sm">
+                        <span className="font-medium">{featured.author}</span>
+                        <div className="flex items-center gap-1">
+                          <ClockIcon className="w-4 h-4" />
+                          {featured.publishedAt}
+                        </div>
+                        <span>{featured.readTime}</span>
+                      </div>
+                      <button className="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-900 font-semibold rounded-xl hover:bg-slate-100 transition-colors w-fit">
+                        Artikel lesen
+                        <ChevronRightIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <img 
+                        src={featured.image} 
+                        alt={featured.title}
+                        className="w-full h-64 lg:h-80 object-cover rounded-2xl"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent rounded-2xl"></div>
+                    </div>
                   </div>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right sm:hidden">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.dividends}
-                  </span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 text-right hidden sm:table-cell">
-                  <span className="sm:hidden">{item.value.replace(',', '').slice(0, -6) + 'k'}</span>
-                  <span className="hidden sm:inline">{item.value}</span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right hidden sm:table-cell">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.gain}
-                  </span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right hidden md:table-cell">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.realized}
-                  </span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 text-right hidden lg:table-cell">{item.invested}</td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right hidden xl:table-cell">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.dividends}
-                  </span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right hidden md:table-cell lg:table-cell xl:hidden">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.dividends}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* News Grid */}
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+          {filteredNews.filter(article => !article.featured || selectedCategory !== 'all').map((article) => (
+            <article 
+              key={article.id}
+              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-200/50 overflow-hidden transition-all duration-300 transform hover:-translate-y-1"
+            >
+              {/* Image */}
+              <div className="relative aspect-[16/10] overflow-hidden">
+                <img 
+                  src={article.image} 
+                  alt={article.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              </div>
+              
+              {/* Content */}
+              <div className="p-6 space-y-4">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <span 
+                      key={tag}
+                      className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-200 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                
+                {/* Title */}
+                <h3 className="text-xl font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
+                  {article.title}
+                </h3>
+                
+                {/* Excerpt */}
+                <p className="text-slate-600 leading-relaxed line-clamp-3">
+                  {article.excerpt}
+                </p>
+                
+                {/* Meta Info */}
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-3 text-sm text-slate-500">
+                    <span className="font-medium text-slate-700">{article.author}</span>
+                    <div className="flex items-center gap-1">
+                      <ClockIcon className="w-3.5 h-3.5" />
+                      {article.publishedAt}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <span>{article.readTime}</span>
+                    <ChevronRightIcon className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        <div className="text-center mt-16">
+          <button className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-violet-700 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/25">
+            Weitere Artikel laden
+            <ChevronRightIcon className="w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
-  );
+  )
 }
