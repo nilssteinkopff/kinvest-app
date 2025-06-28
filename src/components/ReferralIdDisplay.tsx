@@ -22,20 +22,20 @@ export const ReferralIdDisplay = ({ referralId }: { referralId: string }) => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-      <h3 className="text-sm font-medium text-gray-600 mb-2">Ihr Referral-Link</h3>
-      <div className="flex items-center justify-between gap-3">
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+      <h3 className="text-sm/6 font-medium text-gray-600 mb-2">Ihr Referral-Link</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <a 
           href={referralLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 text-sm font-mono text-indigo-600 hover:text-indigo-800 underline break-all transition-colors"
+          className="flex-1 text-sm/6 font-mono text-indigo-600 hover:text-indigo-800 underline break-all transition-colors"
         >
           {referralLink}
         </a>
         <button 
           onClick={copyToClipboard}
-          className="flex-shrink-0 px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 shrink-0"
         >
           Kopieren
         </button>

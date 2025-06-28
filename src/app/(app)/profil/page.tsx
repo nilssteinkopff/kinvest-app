@@ -20,109 +20,67 @@ export default async function ProfilPage() {
     <form>
       <div className="space-y-12">
 
-        {/* Rechnungsadresse */}
+        {/* Rechnungsadresse und Abonnement */}
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
           <div>
-            <h2 className="text-base/7 font-semibold text-gray-900">Rechnungsadresse</h2>
-            <p className="mt-1 text-sm/6 text-gray-500">Deine hinterlegte Adresse für Rechnungen und Korrespondenz.</p>
+            <h2 className="text-base/7 font-semibold text-gray-900">Abonnement und Rechnungen</h2>
+            <p className="mt-1 text-sm/6 text-gray-500">Verwalte dein Abonnement, ändere deine Zahlungsmethode oder lade Rechnungen herunter.</p>
           </div>
 
           <div className="md:col-span-2">
-            <dl className="divide-y divide-gray-100 border-t border-gray-200 text-sm/6">
-              <div className="py-6 sm:flex">
+            <dl className="text-sm/6">
+              <div className="sm:flex">
                 <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Vollständiger Name</dt>
                 <dd className="mt-1 sm:mt-0 sm:flex-auto">
                   <div className="text-gray-900">{profile?.full_name || 'Nicht angegeben'}</div>
                 </dd>
               </div>
-              <div className="py-6 sm:flex">
+              <div className="pt-6 pb-6 sm:flex">
                 <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">E-Mail-Adresse</dt>
                 <dd className="mt-1 sm:mt-0 sm:flex-auto">
                   <div className="text-gray-900">{profile?.email || 'Nicht angegeben'}</div>
                 </dd>
               </div>
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Land</dt>
-                <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                  <div className="text-gray-500">Wird über Rechnungsportal verwaltet</div>
-                </dd>
-              </div>
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Straße und Hausnummer</dt>
-                <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                  <div className="text-gray-500">Wird über Rechnungsportal verwaltet</div>
-                </dd>
-              </div>
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Stadt</dt>
-                <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                  <div className="text-gray-500">Wird über Rechnungsportal verwaltet</div>
-                </dd>
-              </div>
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Bundesland</dt>
-                <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                  <div className="text-gray-500">Wird über Rechnungsportal verwaltet</div>
-                </dd>
-              </div>
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Postleitzahl</dt>
-                <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                  <div className="text-gray-500">Wird über Rechnungsportal verwaltet</div>
-                </dd>
-              </div>
             </dl>
-          </div>
-        </div>
-
-        {/* Abonnement und Rechnungen */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-8 border-b border-gray-900/10 pb-12 md:grid-cols-3">
-          <div>
-            <h2 className="text-base/7 font-semibold text-gray-900">Abonnement und Rechnungen</h2>
-            <p className="mt-1 text-sm/6 text-gray-500">
-              Verwalte dein Abonnement, ändere deine Zahlungsmethode oder lade Rechnungen herunter.
-            </p>
-          </div>
-
-          <div className="md:col-span-2">
-            <dl className="divide-y divide-gray-100 border-t border-gray-200 text-sm/6">
-              <div className="py-6 sm:flex">
-                <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Account Status</dt>
-                <dd className="mt-1 flex justify-between gap-x-6 sm:mt-0 sm:flex-auto">
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 rounded-full ${
+            
+            {/* Abonnement Status */}
+            <div className="mt-6">
+              <div className="bg-gray-50 rounded-xl p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${
                       profile?.subscription_status === 'active' 
                         ? 'bg-green-500' 
                         : 'bg-yellow-500'
                     }`}></div>
-                    <span className="text-gray-900">
-                      {profile?.subscription_status === 'active' ? 'Aktives Abonnement' : 'Inaktiv'}
-                    </span>
-                  </div>
-                </dd>
-              </div>
-              {profile?.has_beta_access && (
-                <div className="py-6 sm:flex">
-                  <dt className="font-medium text-gray-900 sm:w-64 sm:flex-none sm:pr-6">Beta-Zugang</dt>
-                  <dd className="mt-1 sm:mt-0 sm:flex-auto">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-gray-900">🚀 Beta-Nutzer</span>
+                    <div>
+                      <p className="text-sm/6 font-medium text-gray-900">
+                        Status: {profile?.subscription_status === 'active' ? 'Aktives Abonnement' : 'Inaktiv'}
+                      </p>
+                      <p className={`text-xs font-medium ${
+                        profile?.has_beta_access 
+                          ? 'text-purple-600' 
+                          : 'text-gray-500'
+                      }`}>
+                        {profile?.has_beta_access ? '🚀 Beta-Zugang aktiv' : 'Kein Beta-Zugang'}
+                      </p>
                     </div>
-                  </dd>
+                  </div>
+                  
+                  <a
+                    href="https://billing.stripe.com/p/login/00g3cB48IbK6fv25kk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 shrink-0"
+                  >
+                    Rechnungsportal öffnen
+                    <svg className="ml-2 -mr-0.5 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
                 </div>
-              )}
-              <div className="flex border-t border-gray-100 pt-6">
-                <a
-                  href="https://billing.stripe.com/p/login/00g3cB48IbK6fv25kk"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
-                >
-                  Rechnungsportal öffnen →
-                </a>
               </div>
-            </dl>
+            </div>
           </div>
         </div>
 
@@ -141,8 +99,8 @@ export default async function ProfilPage() {
             {profile?.referral_id ? (
               <ReferralIdDisplay referralId={profile.referral_id} />
             ) : (
-              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-6 shadow-sm">
-                <div className="flex items-start space-x-4">
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4">
+                <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                       <svg className="h-6 w-6 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
