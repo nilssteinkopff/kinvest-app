@@ -9,7 +9,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 )
 
 export async function POST(req: NextRequest) {
@@ -63,6 +69,40 @@ export async function POST(req: NextRequest) {
         startingAfter = customers.data[customers.data.length - 1].id
       }
     }
+
+    // 2. Aktive Subscriptions synchronisieren
+    console.log('📊 Syncing active subscriptions...')
+    
+    hasMore = true
+    startingAfter = undefined
+    
+    while (hasMore) {
+      const subscriptions = await stripe.subscriptions.list({
+        limit: 100,
+        starting_after: startingAfter,
+        status: 'all',
+        expand: ['data.customer']
+      })
+
+      for (const subscription of subscriptions.data) {
+        try {
+          await syncSubscriptionToSupabase(subscription)
+          syncResults.subscriptions_synced++
+        } catch (error) {
+          const errorMsg = `Subscription ${subscription.id}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          console.error('❌', errorMsg)
+          syncResults.errors.push(errorMsg)
+        }
+      }
+
+      hasMore = subscriptions.has_more
+      if (hasMore && subscriptions.data.length > 0) {
+        startingAfter = subscriptions.data[subscriptions.data.length - 1].id
+      }
+    }
+
+    // 3. Verwaiste Profile bereinigen (optional)
+    await cleanupOrphanedProfiles()
 
     console.log('✅ Sync job completed:', syncResults)
     
@@ -129,6 +169,102 @@ async function syncCustomerToSupabase(customer: Stripe.Customer) {
 
   if (profileError) {
     throw new Error(`Profile upsert failed: ${profileError.message}`)
+  }
+}
+
+async function syncSubscriptionToSupabase(subscription: Stripe.Subscription) {
+  const customer = subscription.customer as Stripe.Customer
+  
+  if (!customer.email) {
+    console.log('⚠️ Skipping subscription without customer email:', subscription.id)
+    return
+  }
+
+  console.log('📊 Syncing subscription:', subscription.id)
+
+  // User finden
+  const { data: existingUser } = await supabaseAdmin.auth.admin.getUserByEmail(customer.email)
+  
+  if (!existingUser.user) {
+    // Erst Customer syncen
+    await syncCustomerToSupabase(customer)
+    const { data: newUser } = await supabaseAdmin.auth.admin.getUserByEmail(customer.email)
+    if (!newUser.user) throw new Error('Failed to create user for subscription')
+  }
+
+  const userId = existingUser.user?.id || (await supabaseAdmin.auth.admin.getUserByEmail(customer.email)).data.user?.id
+
+  if (!userId) throw new Error('No user ID found')
+
+  const hasBetaAccess = subscription.metadata?.beta_access === 'true'
+
+  // Subscription daten aktualisieren
+  const subscriptionData = {
+    stripe_subscription_id: subscription.id,
+    subscription_status: subscription.status,
+    current_period_start: new Date(subscription.current_period_start * 1000),
+    current_period_end: new Date(subscription.current_period_end * 1000),
+    has_beta_access: hasBetaAccess,
+    subscription_metadata: { stripe_metadata: subscription.metadata },
+    updated_at: new Date().toISOString()
+  }
+
+  const { error: updateError } = await supabaseAdmin
+    .from('profiles')
+    .update(subscriptionData)
+    .eq('id', userId)
+
+  if (updateError) {
+    throw new Error(`Subscription update failed: ${updateError.message}`)
+  }
+}
+
+async function cleanupOrphanedProfiles() {
+  console.log('🧹 Cleaning up orphaned profiles...')
+  
+  // Profile ohne gültige Stripe Customer ID finden und markieren
+  const { data: orphanedProfiles, error } = await supabaseAdmin
+    .from('profiles')
+    .select('id, stripe_customer_id, email')
+    .not('stripe_customer_id', 'is', null)
+
+  if (error) {
+    console.error('⚠️ Failed to fetch profiles for cleanup:', error)
+    return
+  }
+
+  for (const profile of orphanedProfiles || []) {
+    try {
+      // Prüfen ob Customer in Stripe noch existiert
+      const customer = await stripe.customers.retrieve(profile.stripe_customer_id!)
+      
+      if (customer.deleted) {
+        console.log('🗑️ Marking deleted customer profile:', profile.email)
+        await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            subscription_status: 'canceled',
+            has_beta_access: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', profile.id)
+      }
+    } catch (error) {
+      // Customer existiert nicht mehr in Stripe
+      if (error instanceof Stripe.errors.StripeError && error.code === 'resource_missing') {
+        console.log('🗑️ Cleaning up non-existent customer profile:', profile.email)
+        await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            stripe_customer_id: null,
+            stripe_subscription_id: null,
+            subscription_status: 'canceled',
+            has_beta_access: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', profile.id)
+      }
+    }
   }
 }
 

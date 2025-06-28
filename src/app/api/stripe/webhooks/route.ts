@@ -11,7 +11,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Service Role Client für Admin-Operationen (kann auth.users erstellen)
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 )
 
 export async function POST(req: NextRequest) {
