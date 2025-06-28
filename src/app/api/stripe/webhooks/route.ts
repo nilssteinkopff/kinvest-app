@@ -1,3 +1,4 @@
+// src/app/api/stripe/webhooks/route.ts
 import { headers } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
@@ -16,13 +17,14 @@ const supabaseAdmin = createClient(
 export async function POST(req: NextRequest) {
   console.log('🔔 Stripe Webhook received')
   
-  const body = await req.text()
-  const headersList = await headers()
-  const signature = headersList.get('stripe-signature')
-
-  let event: Stripe.Event
-
   try {
+    // WICHTIG: Raw Body als Buffer erhalten (NICHT als Text!)
+    const body = await req.arrayBuffer()
+    const rawBody = Buffer.from(body)
+    
+    const headersList = await headers()
+    const signature = headersList.get('stripe-signature')
+
     if (!signature) {
       console.error('❌ Missing stripe-signature header')
       return NextResponse.json(
@@ -31,72 +33,97 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
-    
-    console.log(`✅ Webhook signature verified: ${event.type}`)
-    console.log(`📋 Event ID: ${event.id}`)
-  } catch (err) {
-    console.error('❌ Webhook signature verification failed:', err)
-    return NextResponse.json(
-      { error: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}` },
-      { status: 400 }
-    )
-  }
-
-  // Check if event was already processed (idempotency)
-  const { data: existingEvent } = await supabaseAdmin
-    .from('webhook_events')
-    .select('id')
-    .eq('stripe_event_id', event.id)
-    .single()
-
-  if (existingEvent) {
-    console.log(`✅ Event ${event.id} already processed, skipping`)
-    return NextResponse.json({ received: true, status: 'already_processed' })
-  }
-
-  // Log webhook event
-  await logWebhookEvent(event, 'received')
-
-  // Handle the event
-  try {
-    switch (event.type) {
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-        await handleSubscriptionUpdate(event.data.object as Stripe.Subscription, event.id)
-        break
-      
-      case 'customer.subscription.deleted':
-        await handleSubscriptionCancellation(event.data.object as Stripe.Subscription, event.id)
-        break
-      
-      case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object as Stripe.Invoice, event.id)
-        break
-      
-      case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object as Stripe.Invoice, event.id)
-        break
-        
-      default:
-        console.log(`🤷 Unhandled event type: ${event.type}`)
-        await logWebhookEvent(event, 'unhandled')
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('❌ Missing STRIPE_WEBHOOK_SECRET')
+      return NextResponse.json(
+        { error: 'Missing webhook secret' },
+        { status: 500 }
+      )
     }
 
-    // Mark event as successfully processed
-    await logWebhookEvent(event, 'processed')
+    // Event mit RAW Buffer konstruieren (DAS IST DER FIX!)
+    let event: Stripe.Event
+    try {
+      event = stripe.webhooks.constructEvent(
+        rawBody,  // Buffer statt Text!
+        signature,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      )
+      console.log(`✅ Webhook signature verified: ${event.type}`)
+      console.log(`📋 Event ID: ${event.id}`)
+    } catch (err) {
+      console.error('❌ Webhook signature verification failed:', err)
+      return NextResponse.json(
+        { error: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}` },
+        { status: 400 }
+      )
+    }
+
+    // Check if event was already processed (idempotency)
+    const { data: existingEvent } = await supabaseAdmin
+      .from('webhook_events')
+      .select('id')
+      .eq('stripe_event_id', event.id)
+      .single()
+
+    if (existingEvent) {
+      console.log(`✅ Event ${event.id} already processed, skipping`)
+      return NextResponse.json({ received: true, status: 'already_processed' })
+    }
+
+    // Log webhook event
+    await logWebhookEvent(event, 'received')
+
+    // Handle the event
+    console.log('🎯 Processing event:', event.type, 'ID:', event.id)
     
-    return NextResponse.json({ received: true, status: 'processed' })
+    try {
+      switch (event.type) {
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdate(event.data.object as Stripe.Subscription, event.id)
+          break
+        
+        case 'customer.subscription.deleted':
+          await handleSubscriptionCancellation(event.data.object as Stripe.Subscription, event.id)
+          break
+        
+        case 'invoice.payment_succeeded':
+          await handlePaymentSucceeded(event.data.object as Stripe.Invoice, event.id)
+          break
+        
+        case 'invoice.payment_failed':
+          await handlePaymentFailed(event.data.object as Stripe.Invoice, event.id)
+          break
+          
+        case 'customer.updated':
+          await handleCustomerUpdate(event.data.object as Stripe.Customer, event.id)
+          break
+          
+        default:
+          console.log(`🤷 Unhandled event type: ${event.type}`)
+          await logWebhookEvent(event, 'unhandled', `Event type ${event.type} not handled`)
+      }
+
+      // Mark event as successfully processed
+      await logWebhookEvent(event, 'processed')
+      
+      console.log('✅ Event processed successfully:', event.id)
+      return NextResponse.json({ received: true, status: 'processed' })
+    } catch (error) {
+      console.error('❌ Error processing webhook:', error)
+      await logWebhookEvent(event, 'error', error instanceof Error ? error.message : 'Unknown error')
+      
+      return NextResponse.json(
+        { error: 'Webhook handler failed' },
+        { status: 500 }
+      )
+    }
+    
   } catch (error) {
-    console.error('❌ Error processing webhook:', error)
-    await logWebhookEvent(event, 'error', error instanceof Error ? error.message : 'Unknown error')
-    
+    console.error('❌ Webhook route error:', error)
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
@@ -165,6 +192,8 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, event
 
   // Subscription data to update in profile
   const subscriptionData = {
+    id: userId,
+    email: customer.email,
     stripe_customer_id: subscription.customer as string,
     stripe_subscription_id: subscription.id,
     subscription_status: subscription.status,
@@ -183,15 +212,17 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, event
     period_end: subscriptionData.current_period_end
   })
 
-  // Update profile with subscription data
-  const { error: profileUpdateError } = await supabaseAdmin
+  // UPSERT verwenden für Profile (erstellt oder aktualisiert)
+  const { error: profileError } = await supabaseAdmin
     .from('profiles')
-    .update(subscriptionData)
-    .eq('id', userId)
+    .upsert(subscriptionData, { 
+      onConflict: 'id',
+      ignoreDuplicates: false 
+    })
 
-  if (profileUpdateError) {
-    console.error('❌ Error updating profile:', profileUpdateError)
-    throw profileUpdateError
+  if (profileError) {
+    console.error('❌ Error updating profile:', profileError)
+    throw profileError
   }
 
   console.log('✅ Profile updated successfully for:', customer.email)
@@ -200,15 +231,6 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, event
 async function handleSubscriptionCancellation(subscription: Stripe.Subscription, eventId: string) {
   console.log('❌ Cancelling subscription:', subscription.id)
   
-  // Get customer details
-  const customer = await stripe.customers.retrieve(subscription.customer as string)
-  
-  if (!customer || customer.deleted || !customer.email) {
-    const error = `No customer email found for cancelled subscription: ${subscription.id}`
-    console.error('❌', error)
-    throw new Error(error)
-  }
-
   // Update subscription status to cancelled in profile
   const { error: updateError } = await supabaseAdmin
     .from('profiles')
@@ -217,14 +239,14 @@ async function handleSubscriptionCancellation(subscription: Stripe.Subscription,
       has_beta_access: false,
       updated_at: new Date().toISOString()
     })
-    .eq('email', customer.email)
+    .eq('stripe_subscription_id', subscription.id)
 
   if (updateError) {
     console.error('❌ Error cancelling subscription in profile:', updateError)
     throw updateError
   }
 
-  console.log('✅ Subscription cancelled successfully for:', customer.email)
+  console.log('✅ Subscription cancelled successfully:', subscription.id)
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice, eventId: string) {
@@ -249,6 +271,25 @@ async function handlePaymentFailed(invoice: Stripe.Invoice, eventId: string) {
   
   // Note: Stripe will automatically update subscription status to 'past_due'
   // We'll catch that via subscription.updated webhook
+}
+
+async function handleCustomerUpdate(customer: Stripe.Customer, eventId: string) {
+  console.log('👤 Handling customer update:', customer.id)
+  
+  if (customer.email) {
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ 
+        email: customer.email,
+        updated_at: new Date().toISOString()
+      })
+      .eq('stripe_customer_id', customer.id)
+
+    if (error) {
+      console.error('⚠️ Customer update error:', error)
+      // Nicht als Fehler werfen, da es optional ist
+    }
+  }
 }
 
 async function logWebhookEvent(
@@ -302,7 +343,7 @@ async function logWebhookEvent(
 
     await supabaseAdmin
       .from('webhook_events')
-      .insert({
+      .upsert({
         stripe_event_id: event.id,
         event_type: event.type,
         user_id: userId,
@@ -312,6 +353,9 @@ async function logWebhookEvent(
         error_message: errorMessage,
         raw_data: event,
         processed_at: new Date().toISOString()
+      }, {
+        onConflict: 'stripe_event_id',
+        ignoreDuplicates: false
       })
 
     console.log(`📝 Logged webhook event: ${event.id} (${status})`)
