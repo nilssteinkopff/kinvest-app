@@ -1,7 +1,21 @@
+//kinvest-app/src/app/(app)/profil/page.tsx
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
+import { ReferralIdDisplay } from '@/components/ReferralIdDisplay'
+import { createServerComponentClient } from '@/utils/supabase/server'
 
-export default function Example() {
+export default async function ProfilPage() {
+  const supabase = createServerComponentClient()
+  
+  // User und Profil Daten abrufen
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('referral_id, email, full_name, subscription_status, has_beta_access')
+    .eq('id', user?.id)
+    .single()
+
   return (
     <form>
       <div className="space-y-12">
@@ -104,6 +118,7 @@ export default function Example() {
                   name="first-name"
                   type="text"
                   autoComplete="given-name"
+                  defaultValue={profile?.full_name?.split(' ')[0] || ''}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -119,6 +134,7 @@ export default function Example() {
                   name="last-name"
                   type="text"
                   autoComplete="family-name"
+                  defaultValue={profile?.full_name?.split(' ').slice(1).join(' ') || ''}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -134,6 +150,7 @@ export default function Example() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  defaultValue={profile?.email || ''}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
               </div>
@@ -150,6 +167,9 @@ export default function Example() {
                   autoComplete="country-name"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 >
+                  <option>Germany</option>
+                  <option>Austria</option>
+                  <option>Switzerland</option>
                   <option>United States</option>
                   <option>Canada</option>
                   <option>Mexico</option>
@@ -223,6 +243,55 @@ export default function Example() {
           </div>
         </div>
 
+        {/* Neue Referral-ID Section */}
+        <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
+          <div>
+            <h2 className="text-base/7 font-semibold text-gray-900">Freunde einladen</h2>
+            <p className="mt-1 text-sm/6 text-gray-600">
+              Teilen Sie Ihre persönliche Referral-ID mit Freunden und erhalten Sie Belohnungen für jede erfolgreiche Empfehlung.
+            </p>
+          </div>
+
+          <div className="max-w-2xl md:col-span-2">
+            {profile?.referral_id ? (
+              <ReferralIdDisplay referralId={profile.referral_id} />
+            ) : (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-700">
+                      Referral-ID wird generiert... Falls diese nicht erscheint, kontaktieren Sie den Support.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Account Status Info */}
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Account Status:</span>
+                <span className={`font-medium ${
+                  profile?.subscription_status === 'active' ? 'text-green-600' : 'text-yellow-600'
+                }`}>
+                  {profile?.subscription_status === 'active' ? '✅ Aktiv' : '⏳ Inaktiv'}
+                </span>
+              </div>
+              {profile?.has_beta_access && (
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-600">Beta Access:</span>
+                  <span className="text-purple-600 font-medium">🚀 Beta Nutzer</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-gray-900/10 pb-12 md:grid-cols-3">
           <div>
             <h2 className="text-base/7 font-semibold text-gray-900">Benachrichtigungen</h2>
@@ -270,10 +339,10 @@ export default function Example() {
                   </div>
                   <div className="text-sm/6">
                     <label htmlFor="comments" className="font-medium text-gray-900">
-                      Comments
+                      Neue Kurse
                     </label>
                     <p id="comments-description" className="text-gray-500">
-                      Get notified when someones posts a comment on a posting.
+                      Benachrichtigungen wenn neue Investment-Kurse verfügbar sind.
                     </p>
                   </div>
                 </div>
@@ -311,10 +380,10 @@ export default function Example() {
                   </div>
                   <div className="text-sm/6">
                     <label htmlFor="candidates" className="font-medium text-gray-900">
-                      Candidates
+                      Markt Updates
                     </label>
                     <p id="candidates-description" className="text-gray-500">
-                      Get notified when a candidate applies for a job.
+                      Wichtige Marktentwicklungen und Investment-Nachrichten.
                     </p>
                   </div>
                 </div>
@@ -352,10 +421,10 @@ export default function Example() {
                   </div>
                   <div className="text-sm/6">
                     <label htmlFor="offers" className="font-medium text-gray-900">
-                      Offers
+                      Referral Belohnungen
                     </label>
                     <p id="offers-description" className="text-gray-500">
-                      Get notified when a candidate accepts or rejects an offer.
+                      Benachrichtigungen über erfolgreiche Empfehlungen und Belohnungen.
                     </p>
                   </div>
                 </div>
@@ -363,7 +432,7 @@ export default function Example() {
             </fieldset>
 
             <fieldset>
-              <legend className="text-sm/6 font-semibold text-gray-900">Benachrichtigungen</legend>
+              <legend className="text-sm/6 font-semibold text-gray-900">Push Benachrichtigungen</legend>
               <p className="mt-1 text-sm/6 text-gray-600">These are delivered via SMS to your mobile phone.</p>
               <div className="mt-6 space-y-6">
                 <div className="flex items-center gap-x-3">
