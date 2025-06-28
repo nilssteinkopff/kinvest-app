@@ -2,10 +2,10 @@
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import { ReferralIdDisplay } from '@/components/ReferralIdDisplay'
-import { createServerComponentClient } from '@/utils/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 
 export default async function ProfilPage() {
-  const supabase = createServerComponentClient()
+  const supabase = await createClient()
   
   // User und Profil Daten abrufen
   const { data: { user } } = await supabase.auth.getUser()
