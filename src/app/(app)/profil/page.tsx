@@ -257,81 +257,42 @@ export default async function ProfilPage() {
             </p>
           </div>
 
-          <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+          <div className="max-w-2xl md:col-span-2">
             {profile?.referral_id ? (
-              <div className="col-span-full">
-                <label htmlFor="referral-link" className="block text-sm/6 font-medium text-gray-900">
-                  Dein Referral-Link
-                </label>
-                <div className="mt-2">
-                  <div className="flex items-center gap-x-3">
-                    <input
-                      id="referral-link"
-                      name="referral-link"
-                      type="text"
-                      readOnly
-                      value={`https://checkout.kinvest.ai/api/checkout?ref=${profile.referral_id}`}
-                      className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 sm:text-sm/6 font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText(`https://checkout.kinvest.ai/api/checkout?ref=${profile.referral_id}`);
-                        alert('Referral-Link kopiert!');
-                      }}
-                      className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    >
-                      Kopieren
-                    </button>
-                  </div>
-                  <p className="mt-3 text-sm/6 text-gray-600">
-                    Teile diesen Link mit Freunden für Referral-Belohnungen. Der Link führt direkt zum Checkout.
-                  </p>
-                </div>
-              </div>
+              <ReferralIdDisplay referralId={profile.referral_id} />
             ) : (
-              <div className="col-span-full">
-                <div className="rounded-md bg-yellow-50 p-4 ring-1 ring-yellow-200">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm/6 font-medium text-yellow-800">
-                        Referral-ID wird generiert
-                      </h3>
-                      <p className="mt-1 text-sm/6 text-yellow-700">
-                        Deine persönliche Referral-ID wird automatisch erstellt. Falls diese nicht erscheint, kontaktiere den Support.
-                      </p>
-                    </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-yellow-700">
+                      Referral-ID wird generiert... Falls diese nicht erscheint, kontaktiere den Support.
+                    </p>
                   </div>
                 </div>
               </div>
             )}
             
             {/* Account Status Info */}
-            <div className="col-span-full">
-              <label className="block text-sm/6 font-medium text-gray-900">
-                Account Status
-              </label>
-              <div className="mt-2 rounded-md bg-gray-50 px-3 py-2 ring-1 ring-gray-300">
-                <div className="flex items-center justify-between text-sm/6">
-                  <span className="text-gray-600">Abonnement:</span>
-                  <span className={`font-medium ${
-                    profile?.subscription_status === 'active' ? 'text-green-600' : 'text-yellow-600'
-                  }`}>
-                    {profile?.subscription_status === 'active' ? '✅ Aktiv' : '⏳ Inaktiv'}
-                  </span>
-                </div>
-                {profile?.has_beta_access && (
-                  <div className="flex items-center justify-between text-sm/6 mt-2 pt-2 border-t border-gray-200">
-                    <span className="text-gray-600">Beta Zugang:</span>
-                    <span className="text-purple-600 font-medium">🚀 Beta Nutzer</span>
-                  </div>
-                )}
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Account Status:</span>
+                <span className={`font-medium ${
+                  profile?.subscription_status === 'active' ? 'text-green-600' : 'text-yellow-600'
+                }`}>
+                  {profile?.subscription_status === 'active' ? '✅ Aktiv' : '⏳ Inaktiv'}
+                </span>
               </div>
+              {profile?.has_beta_access && (
+                <div className="flex items-center justify-between text-sm mt-2">
+                  <span className="text-gray-600">Beta Zugang:</span>
+                  <span className="text-purple-600 font-medium">🚀 Beta Nutzer</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
