@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/sync-stripe",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/stripe/webhooks/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/sync-stripe/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}
