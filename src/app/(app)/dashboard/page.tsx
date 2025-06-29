@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { ArrowPathIcon, ArrowUpIcon, ArrowDownIcon, ChartBarIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { MinusSmallIcon, PlusSmallIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { MinusSmallIcon, PlusSmallIcon } from '@heroicons/react/24/outline'
 import {
   LineChart,
   Line,
@@ -13,6 +14,10 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+
+// ✅ IMPORTS für ausgelagerte Komponenten
+import { KInvestPortfolioTable } from '@/components/portfolio/PortfolioTable'
+import { PerformanceBadge } from '@/components/portfolio/PerformanceBadge'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -73,6 +78,33 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const StatusBadge = ({ status, className = "" }) => {
+  const configs = {
+    live: { bg: "bg-green-100", text: "text-green-800", label: "Live" },
+    updated: { bg: "bg-blue-100", text: "text-blue-800", label: "Aktualisiert" },
+    outperforming: { bg: "bg-emerald-100", text: "text-emerald-800", label: "Übertrifft Markt" },
+    underperforming: { bg: "bg-red-100", text: "text-red-800", label: "Unter Markt" },
+    neutral: { bg: "bg-gray-100", text: "text-gray-800", label: "Neutral" }
+  }
+  
+  const config = configs[status] || configs.neutral
+  
+  return (
+    <span className={classNames(
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+      config.bg,
+      config.text,
+      className
+    )}>
+      {status === 'live' && <div className="w-2 h-2 bg-green-400 rounded-full mr-1.5 animate-pulse" />}
+      {status === 'updated' && <ClockIcon className="w-3 h-3 mr-1" />}
+      {status === 'outperforming' && <ChartBarIcon className="w-3 h-3 mr-1" />}
+      {status === 'underperforming' && <ChartBarIcon className="w-3 h-3 mr-1" />}
+      {config.label}
+    </span>
+  )
+}
+
 export default function Portfolio() {
   const [data, setData] = useState<PortfolioData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -117,7 +149,6 @@ export default function Portfolio() {
       })
       
       if (response.ok) {
-        // Nach Update die Daten neu laden
         setTimeout(() => {
           fetchPortfolioData()
         }, 1000)
@@ -134,45 +165,6 @@ export default function Portfolio() {
     fetchPortfolioData()
   }, [timeRange])
 
-  // Portfolio Summary für Tabelle
-  const getPositionsSummary = () => {
-    if (!data?.positions || data.positions.length === 0) {
-      return [
-        {
-          name: 'Portfolio Gesamt',
-          value: valueFormatter(data?.summary?.total_value || 0),
-          invested: valueFormatter(data?.summary?.total_invested || 0),
-          cashflow: valueFormatter(data?.summary?.cash_position || 0),
-          gain: `${data?.summary?.total_gain_pct >= 0 ? '+' : ''}${valueFormatter(data?.summary?.total_gain || 0)}`,
-          realized: '+€0.00',
-          dividends: '+€0.00',
-          bgColor: 'bg-blue-500',
-          lineColor: '#3b82f6',
-          changeType: (data?.summary?.total_gain_pct || 0) >= 0 ? 'positive' : 'negative',
-        }
-      ]
-    }
-
-    // Top Positionen aus position_performance erstellen
-    const topPositions = data.positions
-      .sort((a, b) => b.position_value - a.position_value)
-      .slice(0, 3)
-      .map((pos, index) => ({
-        name: pos.ticker.replace('.US', '').replace('.HK', '').replace('.AU', ''),
-        value: valueFormatter(pos.position_value),
-        invested: valueFormatter(pos.position_value * 0.9), // Approximation
-        cashflow: valueFormatter(pos.position_size),
-        gain: `${Math.random() > 0.5 ? '+' : '-'}€${Math.floor(Math.random() * 1000)}.00`,
-        realized: `${Math.random() > 0.5 ? '+' : '-'}€${Math.floor(Math.random() * 500)}.00`,
-        dividends: `+€${Math.floor(Math.random() * 200)}.00`,
-        bgColor: ['bg-blue-500', 'bg-violet-500', 'bg-fuchsia-500'][index],
-        lineColor: ['#3b82f6', '#8b5cf6', '#d946ef'][index],
-        changeType: Math.random() > 0.3 ? 'positive' : 'negative',
-      }))
-
-    return topPositions
-  }
-
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 space-y-6 sm:space-y-8 min-w-[320px]">
@@ -181,7 +173,7 @@ export default function Portfolio() {
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
         </div>
-        <div className="h-80 bg-gray-200 rounded animate-pulse"></div>
+        <div className="h-96 bg-gray-200 rounded animate-pulse"></div>
       </div>
     )
   }
@@ -211,39 +203,43 @@ export default function Portfolio() {
     )
   }
 
-  const summary = getPositionsSummary()
-
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8 space-y-6 sm:space-y-8 min-w-[320px]">
+      {/* Portfolio Header mit Badges */}
       <div className="flex justify-between items-start">
-        <div className="min-w-0 flex-1">
-          <h3 className="text-xs sm:text-sm text-gray-600 truncate">Portfolio Performance</h3>
+        <div className="min-w-0">
+          <div className="flex items-center space-x-3 mb-2">
+            <h3 className="text-xs sm:text-sm text-gray-600 truncate">Portfolio Performance</h3>
+            <StatusBadge status="live" />
+            {data.meta.lastUpdate && (
+              <StatusBadge status="updated" />
+            )}
+          </div>
+          
           <p className="mt-1 text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 truncate">
             {valueFormatter(data.summary.total_value)}
           </p>
-          <p className="mt-1 text-xs sm:text-sm font-medium">
-            <span className={classNames(
-              data.summary.total_gain_pct >= 0 ? 'text-emerald-700' : 'text-red-700'
-            )}>
-              {data.summary.total_gain_pct >= 0 ? '+' : ''}{valueFormatter(data.summary.total_gain)} 
-              ({data.summary.total_gain_pct >= 0 ? '+' : ''}{data.summary.total_gain_pct.toFixed(2)}%)
-            </span>{' '}
-            <span className="font-normal text-gray-600 hidden sm:inline">Gesamt Performance</span>
-            <span className="font-normal text-gray-600 sm:hidden">Gesamt</span>
-          </p>
+          
+          <div className="flex items-center space-x-3 mt-2">
+            <PerformanceBadge percentage={data.summary.total_gain_pct} />
+            <span className="text-xs sm:text-sm text-gray-600 font-normal">
+              {data.summary.total_gain_pct >= 0 ? '+' : ''}{valueFormatter(data.summary.total_gain)} Gesamt Performance
+            </span>
+          </div>
+          
           {data.meta.lastUpdate && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-2">
               Letztes Update: {new Date(data.meta.lastUpdate).toLocaleDateString('de-DE')}
             </p>
           )}
         </div>
         
-        <div className="flex space-x-2 ml-4">
+        <div className="flex space-x-2">
           {/* Time Range Selector */}
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(Number(e.target.value))}
-            className="text-xs border border-gray-200 rounded px-2 py-1 bg-white"
+            className="text-xs sm:text-sm border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value={30}>30T</option>
             <option value={90}>3M</option>
@@ -271,7 +267,7 @@ export default function Portfolio() {
         </div>
       </div>
 
-      {/* Desktop Chart */}
+      {/* Portfolio Chart */}
       <div className="hidden sm:block min-w-0">
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={data.chart}>
@@ -288,7 +284,7 @@ export default function Portfolio() {
               className="text-gray-500 text-sm"
               tick={{ fontSize: 10 }}
               tickFormatter={valueFormatter}
-              width={50}
+              width={70}
               axisLine={false}
               tickLine={false}
             />
@@ -383,145 +379,15 @@ export default function Portfolio() {
         </ResponsiveContainer>
       </div>
 
-      {/* Portfolio Details Table/List */}
-      <div className="mt-6 sm:mt-8 min-w-0">
-        {/* Mobile View - Disclosure List */}
-        <div className="sm:hidden">
-          <div className="border-t border-gray-100">
-            <dl className="divide-y divide-gray-100">
-              {summary.map((item, index) => (
-                <Disclosure key={item.name} as="div" className="py-4">
-                  <dt>
-                    <DisclosureButton className="group flex w-full items-center justify-between text-left">
-                      <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span
-                          className={classNames(item.bgColor, 'w-1 h-6 rounded flex-shrink-0')}
-                          aria-hidden={true}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <span className="text-sm font-medium text-gray-900 block truncate">
-                            {item.name}
-                          </span>
-                          <div className="flex items-center space-x-4 mt-1">
-                            <div className="text-xs text-gray-500">
-                              Wert: <span className="font-medium text-gray-900">
-                                {item.value}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <span className="ml-6 flex h-7 items-center">
-                        <PlusSmallIcon aria-hidden="true" className="size-5 group-data-[open]:hidden text-gray-400" />
-                        <MinusSmallIcon aria-hidden="true" className="size-5 hidden group-data-[open]:block text-gray-400" />
-                      </span>
-                    </DisclosureButton>
-                  </dt>
-                  <DisclosurePanel as="dd" className="mt-4 pr-12">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Wert</div>
-                          <div className="text-sm font-medium text-gray-900">{item.value}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Investiert</div>
-                          <div className="text-sm font-medium text-gray-900">{item.invested}</div>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Gewinn</div>
-                          <div className={classNames(
-                            item.changeType === 'positive'
-                              ? 'text-emerald-700'
-                              : 'text-red-700',
-                            'text-sm font-medium'
-                          )}>
-                            {item.gain}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs font-medium text-gray-500">Cash</div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {item.cashflow}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </DisclosurePanel>
-                </Disclosure>
-              ))}
-            </dl>
-          </div>
-        </div>
-
-        {/* Desktop View - Table */}
-        <table className="w-full border-collapse hidden sm:table">
-          <thead>
-            <tr className="border-b border-gray-200">
-              <th className="py-2 sm:py-3.5 pl-1 sm:pl-2 pr-1 sm:pr-2 text-left text-xs sm:text-sm font-semibold text-gray-900">
-                Position
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden sm:table-cell">
-                Wert
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden sm:table-cell">
-                Gewinn
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden md:table-cell">
-                Investiert
-              </th>
-              <th className="px-1 py-2 sm:py-3.5 text-right text-xs sm:text-sm font-semibold text-gray-900 hidden lg:table-cell">
-                Cash Flow
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {summary.map((item) => (
-              <tr key={item.name}>
-                <td className="py-2 sm:py-3 pl-1 sm:pl-2 pr-1 sm:pr-2 text-xs sm:text-sm font-medium text-gray-900">
-                  <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
-                    <span
-                      className={classNames(item.bgColor, 'w-1 h-4 sm:h-6 rounded flex-shrink-0')}
-                      aria-hidden={true}
-                    />
-                    <span className="truncate text-xs sm:text-sm leading-tight">
-                      {item.name}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 text-right hidden sm:table-cell">
-                  {item.value}
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-right hidden sm:table-cell">
-                  <span
-                    className={classNames(
-                      item.changeType === 'positive'
-                        ? 'text-emerald-700'
-                        : 'text-red-700',
-                    )}
-                  >
-                    {item.gain}
-                  </span>
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 text-right hidden md:table-cell">
-                  {item.invested}
-                </td>
-                <td className="px-1 py-2 sm:py-3 text-xs sm:text-sm text-gray-500 text-right hidden lg:table-cell">
-                  {item.cashflow}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Portfolio Positionen Tabelle */}
+      <KInvestPortfolioTable />
 
       {/* Debug Info (nur in Development) */}
       {process.env.NODE_ENV === 'development' && (
         <div className="mt-8 text-xs text-gray-400 border-t border-gray-100 pt-4">
           <p>Debug: {data.meta.dataPoints} Datenpunkte | {data.meta.dateRange.start} bis {data.meta.dateRange.end}</p>
           <p>Transaktionen (30T): {data.recentTransactions.length}</p>
+          <p>Portfolio Wert: {valueFormatter(data.summary.total_value)} | Gewinn: {valueFormatter(data.summary.total_gain)} ({data.summary.total_gain_pct.toFixed(1)}%)</p>
         </div>
       )}
     </div>
